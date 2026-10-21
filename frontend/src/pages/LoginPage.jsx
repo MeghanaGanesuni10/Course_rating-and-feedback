@@ -42,7 +42,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const user = await googleAuth(credential, selectedRole);
+      const user = await googleAuth(credential, selectedRole, 'login');
       toast.success(`Welcome back, ${user.name.split(' ')[0]}!`);
       navigate(user.role === 'admin' ? '/admin' : '/dashboard');
     } catch (err) {

@@ -104,16 +104,16 @@ export const login = async (req, res, next) => {
   }
 };
 
-// POST /api/auth/google — verify a Google Identity Services credential and sign in/register.
+// POST /api/auth/google — verify a Google credential for the selected login or registration flow.
 export const googleLogin = async (req, res, next) => {
   try {
-    const { credential, role = 'student' } = req.body;
+    const { credential, role = 'student', mode = 'login' } = req.body;
     const clientId = process.env.GOOGLE_CLIENT_ID;
 
     if (!clientId) {
       return res.status(503).json({ message: 'Google sign-in is not configured on this server.' });
     }
-    if (!credential || !['student', 'admin'].includes(role)) {
+    if (!credential || !['student', 'admin'].includes(role) || !['login', 'register'].includes(mode)) {
       return res.status(400).json({ message: 'A Google credential and valid account type are required.' });
     }
 
@@ -132,8 +132,19 @@ export const googleLogin = async (req, res, next) => {
 
     const email = identity.email.toLowerCase().trim();
     let user = await User.findOne({ $or: [{ googleId: identity.sub }, { email }] }).select('+googleId');
+    if (user && mode === 'register') {
+      return res.status(409).json({
+        code: 'ACCOUNT_ALREADY_EXISTS',
+        role: user.role,
+        message: `This email is already registered as a ${user.role}. Please sign in to that account.`,
+      });
+    }
     if (user && user.role !== role) {
       return res.status(403).json({ message: `This Google account is registered as ${user.role}. Choose the ${user.role} account type.` });
+    }
+
+    if (!user && mode === 'login') {
+      return res.status(404).json({ message: 'No account is registered with this Google email. Please sign up first.' });
     }
 
     if (user?.googleId && user.googleId !== identity.sub) {

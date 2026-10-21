@@ -46,8 +46,8 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   }, []);
 
-  const googleAuth = useCallback(async (credential, role) => {
-    const { data } = await api.post('/auth/google', { credential, role });
+  const googleAuth = useCallback(async (credential, role, mode) => {
+    const { data } = await api.post('/auth/google', { credential, role, mode });
     localStorage.setItem('cr_token', data.token);
     localStorage.setItem('cr_user', JSON.stringify(data.user));
     setUser(data.user);

@@ -46,7 +46,7 @@ export default function RegisterPage() {
     setError('');
     setLoading(true);
     try {
-      const user = await googleAuth(credential, form.role);
+      const user = await googleAuth(credential, form.role, 'register');
       toast.success(`Account ready. Welcome, ${user.name.split(' ')[0]}!`);
       navigate(user.role === 'admin' ? '/admin' : '/dashboard');
     } catch (err) {

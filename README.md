@@ -7,7 +7,6 @@ CourseRate is a course feedback and rating application. Students can explore cou
 - **App:** [course-rating-and-feedback.vercel.app](https://course-rating-and-feedback.vercel.app/)
 - **Sign in:** [course-rating-and-feedback.vercel.app/login](https://course-rating-and-feedback.vercel.app/login)
 - **Create an account:** [course-rating-and-feedback.vercel.app/register](https://course-rating-and-feedback.vercel.app/register)
-- **API and database health:** [course-rating-and-feedback.onrender.com/api/health](https://course-rating-and-feedback.onrender.com/api/health)
 - **Source code:** [GitHub repository](https://github.com/MeghanaGanesuni10/Course_rating-and-feedback)
 
 The health endpoint reports whether the API and its MongoDB connection are available. Render's free service may take a short time to wake after being idle.
@@ -174,6 +173,4 @@ frontend/   React and Vite web application
 render.yaml Render backend service configuration
 ```
 
-## License
 
-MIT. See the repository for license details.

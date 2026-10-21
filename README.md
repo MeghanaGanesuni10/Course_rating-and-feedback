@@ -1,198 +1,179 @@
 # CourseRate
 
-CourseRate is a MERN course feedback and rating app. Students browse courses and submit reviews; administrators manage courses, users, feedback, and platform analytics. MongoDB stores accounts, courses, and feedback.
+CourseRate is a course feedback and rating application. Students can explore courses and share reviews; administrators can manage courses, users, and feedback.
+
+## Try the deployed app
+
+- **App:** [course-rating-and-feedback.vercel.app](https://course-rating-and-feedback.vercel.app/)
+- **Sign in:** [course-rating-and-feedback.vercel.app/login](https://course-rating-and-feedback.vercel.app/login)
+- **Create an account:** [course-rating-and-feedback.vercel.app/register](https://course-rating-and-feedback.vercel.app/register)
+- **API and database health:** [course-rating-and-feedback.onrender.com/api/health](https://course-rating-and-feedback.onrender.com/api/health)
+- **Source code:** [GitHub repository](https://github.com/MeghanaGanesuni10/Course_rating-and-feedback)
+
+The health endpoint reports whether the API and its MongoDB connection are available. Render's free service may take a short time to wake after being idle.
 
 ## Features
 
-### Student
+### Student accounts
 
-- Create an account as a student with email/password or Google sign-in.
-- Sign in, update profile details, and change password.
-- Browse and search courses, filter/sort the directory, and view course reviews.
-- Submit a course rating and written review, then edit or delete your own feedback.
-- View a personal dashboard and feedback history.
+- Register or sign in with an email and password, or use Google.
+- Browse and search courses, view reviews, and submit ratings and written feedback.
+- Edit or delete your own feedback, view feedback history, and update your profile.
 
-### Administrator
+### Administrator accounts
 
-- Create an account as an administrator with email/password or Google sign-in.
-- View platform statistics, rating distributions, top-rated courses, and recent feedback.
-- Create, update, and delete courses.
-- Search and manage users, change roles, and delete accounts.
-- Review and delete feedback.
+- View platform statistics and recent activity.
+- Create, edit, and delete courses.
+- Search and manage user accounts and feedback.
 
-**Admin signup is public by design in this version. Anyone who can access registration can select Admin and receive administrator access.** Do not use this setup for a public production service unless that policy is intentional.
+> **Administrator access:** The current registration screen lets anyone select the Admin role. Restrict or remove public admin registration before using the app where administrator access must be controlled.
 
-### Authentication and data
+### Authentication and storage
 
-- JWT sessions, bcrypt password hashing, and role-protected admin routes.
-- Google Identity Services sign-in; the backend verifies Google ID tokens with `google-auth-library` before signing in or creating an account.
-- MongoDB Atlas via Mongoose.
-- Rate limits, Helmet security headers, CORS allowlisting, and duplicate-review prevention.
-
-## Requirements
-
-- Node.js `>=22.12.0 <25` (the current Vite and Google auth dependencies require a recent Node release).
-- npm.
-- A MongoDB database (MongoDB Atlas recommended).
-- A Google OAuth Web Client ID to enable Google sign-in.
+- JWT-based sessions and bcrypt password hashing.
+- Server-side Google ID token verification.
+- Student and admin roles are checked during login and for protected API routes.
+- MongoDB Atlas stores users, courses, and feedback. The application database is named `courserate`; registered accounts are in the `users` collection.
 
 ## Run locally
 
-Install dependencies in both folders:
+### Requirements
 
-```powershell
+- Node.js `>=22.12.0 <25` and npm.
+- A MongoDB database (Atlas is recommended).
+- A Google OAuth Web Client ID if you want to test Google sign-in.
+
+### 1. Configure and start the backend
+
+From the repository root:
+
+```bash
 cd backend
 npm ci
-Copy-Item .env.example .env
 ```
 
-Set these values in `backend/.env`:
+Copy `backend/.env.example` to `backend/.env`, then set the values for your local environment:
 
 ```env
 PORT=5000
-MONGO_URI=your-mongodb-atlas-connection-string
-JWT_SECRET=use-a-long-random-secret
-GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster-host>/?retryWrites=true&w=majority
+JWT_SECRET=<long-random-secret>
+GOOGLE_CLIENT_ID=<your-google-web-client-id>
 CLIENT_URL=http://localhost:5173
 NODE_ENV=development
 ```
 
-Then install and configure the frontend:
+Start the API:
 
-```powershell
-cd ../frontend
-npm ci
-Copy-Item .env.example .env
+```bash
+npm run dev
 ```
 
-Set these values in `frontend/.env`:
+The API runs at `http://localhost:5000`; its health endpoint is `http://localhost:5000/api/health`.
+
+### 2. Configure and start the frontend
+
+In a second terminal from the repository root:
+
+```bash
+cd frontend
+npm ci
+```
+
+Copy `frontend/.env.example` to `frontend/.env` and set:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
-VITE_GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
+VITE_GOOGLE_CLIENT_ID=<your-google-web-client-id>
 ```
 
-Use the same Google Web Client ID in both files. The Client ID is public; do not put a Google Client Secret in the frontend. See [Google sign-in setup](#google-sign-in-setup).
+Start Vite and open the local URL it prints (normally `http://localhost:5173`):
 
-Run the API and web app in separate terminals:
-
-```powershell
-# Terminal 1, from backend/
+```bash
 npm run dev
 ```
 
-```powershell
-# Terminal 2, from frontend/
-npm run dev
-```
+Use the same Google Web Client ID in both environment files. Add `http://localhost:5173` to the OAuth client's **Authorized JavaScript origins**. Never put a Google Client Secret, MongoDB URI, or JWT secret in a `VITE_` variable; Vite exposes those variables in browser code.
 
-Open <http://localhost:5173>. The API health endpoint is <http://localhost:5000/api/health>.
+### Google authentication behavior
 
-### Google sign-in setup
+- On the registration page, Google creates an account only if that email is not already registered.
+- On the login page, Google signs in an existing account. If no account exists yet, register first.
+- Use the account's existing role when signing in. An email already registered as a student cannot be used to create a second admin account, or vice versa.
 
-1. In Google Cloud Console, create an OAuth Client ID with application type **Web application**.
-2. Under **Authorized JavaScript origins**, add `http://localhost` and `http://localhost:5173`.
-3. Configure the OAuth consent screen. Add test accounts if the app is in testing mode.
-4. Copy the Client ID to `GOOGLE_CLIENT_ID` in `backend/.env` and `VITE_GOOGLE_CLIENT_ID` in `frontend/.env`.
-5. Restart both development servers after changing environment files.
+## MongoDB Atlas
 
-Google sign-in creates a new account with the role selected on the login or registration page. If that Google email already belongs to a different role, sign in using that role. Existing Gmail or Google Workspace accounts can be associated with their Google identity; other existing email accounts must first use password sign-in.
+The backend connects to the `courserate` database. To inspect accounts, open Atlas **Database → Clusters → Browse Collections**, then select `courserate` → `users`. The `role` field shows `student` or `admin`. Passwords are stored as hashes and should not be shared.
 
-### Optional sample data
+## API overview
 
-Seed the sample course records:
+All API paths are prefixed with `/api`.
 
-```powershell
-cd backend
-npm run seed
-```
-
-The first admin can also be created or an existing account promoted with `backend/src/scripts/createAdmin.js`. Public Admin signup is available as described above.
-
-## Main API routes
-
-| Method | Path | Access | Purpose |
+| Method | Endpoint | Access | Description |
 |---|---|---|---|
-| GET | `/api/health` | Public | API and database status |
-| POST | `/api/auth/register` | Public | Create student/admin account |
-| POST | `/api/auth/login` | Public | Email/password login |
-| POST | `/api/auth/google` | Public | Verify Google sign-in and create/login |
-| GET | `/api/auth/me` | Signed in | Current account |
-| GET | `/api/courses` | Public | Search and list courses |
-| GET | `/api/courses/:id` | Public | Course details and reviews |
-| POST/PATCH/DELETE | `/api/courses...` | Admin | Manage courses |
-| POST | `/api/feedback` | Signed in | Submit course feedback |
-| GET | `/api/feedback/mine` | Signed in | Current user's feedback |
-| PATCH/DELETE | `/api/feedback/:id` | Owner/Admin | Edit or delete feedback |
-| GET | `/api/admin/analytics` | Admin | Dashboard statistics |
-| GET | `/api/admin/users` | Admin | Search/manage users |
-| GET | `/api/admin/all-feedback` | Admin | Browse all feedback |
+| `GET` | `/health` | Public | API and database connection status |
+| `POST` | `/auth/register` | Public | Create an email/password account |
+| `POST` | `/auth/login` | Public | Sign in with email/password and selected role |
+| `POST` | `/auth/google` | Public | Google sign-in or registration flow |
+| `GET` | `/auth/me` | Signed in | Get the current account |
+| `GET` | `/courses` | Public | List and search courses |
+| `GET` | `/courses/:id` | Public | Course details and feedback |
+| `POST` | `/feedback` | Signed in | Submit feedback |
+| `GET` | `/feedback/mine` | Signed in | Get your feedback |
+| `/courses...` | Admin | Create, update, and delete courses |
+| `/admin...` | Admin | Manage users, feedback, and analytics |
 
-## Deploy
+## Deployment configuration
 
-The repository includes `render.yaml` for the Node API and `frontend/vercel.json` for React Router deep links. Both providers deploy from a GitHub repository; this folder must first be pushed to a repository you can connect to Render and Vercel.
+The production frontend is hosted on Vercel and the API on Render. Deployments are connected to the `main` branch of the GitHub repository.
 
-If this project has not been pushed to GitHub yet, create an empty GitHub repository and run these commands from the project folder (replace the remote URL):
+### Vercel frontend
 
-```powershell
-git add .
-git commit -m "Prepare CourseRate for deployment"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
-git push -u origin main
+- **Root directory:** `frontend`
+- **Production URL:** `https://course-rating-and-feedback.vercel.app`
+- Set `VITE_API_URL` to `https://course-rating-and-feedback.onrender.com/api`.
+- Set `VITE_GOOGLE_CLIENT_ID` to the Google OAuth Web Client ID.
+- `frontend/vercel.json` rewrites client-side routes to the React app.
+
+### Render API
+
+The repository's `render.yaml` configures the backend service. Its root directory is `backend`, and its health check path is `/api/health`.
+
+Set these variables in the Render service settings:
+
+| Variable | Value |
+|---|---|
+| `MONGO_URI` | MongoDB Atlas connection URI (keep private) |
+| `JWT_SECRET` | Long random signing secret (keep private) |
+| `GOOGLE_CLIENT_ID` | Same Google OAuth Web Client ID as the frontend |
+| `CLIENT_URL` | `https://course-rating-and-feedback.vercel.app` |
+| `NODE_ENV` | `production` |
+
+In Google Cloud OAuth settings, add `https://course-rating-and-feedback.vercel.app` as an authorized JavaScript origin. Keep the localhost origin for development if needed.
+
+## Checks
+
+Run the frontend checks from `frontend/`:
+
+```bash
+npm run lint
+npm run build
 ```
 
-The root `.gitignore` excludes `.env` files. Check that no credentials are staged before pushing.
+Run a backend syntax check from `backend/`:
 
-### 1. Deploy the API on Render
+```bash
+node --check src/server.js
+```
 
-1. In Render, create a Blueprint from the repository and use the root `render.yaml`, or create a Web Service manually with:
-   - **Root Directory:** `backend`
-   - **Build Command:** `npm ci`
-   - **Start Command:** `npm start`
-   - **Health Check Path:** `/api/health`
-2. Set the service environment variables:
-   - `MONGO_URI` — MongoDB Atlas connection string.
-   - `JWT_SECRET` — a long random secret (the Blueprint generates one).
-   - `CLIENT_URL` — temporarily `http://localhost:5173`; replace it after you have the Vercel URL.
-   - `GOOGLE_CLIENT_ID` — the same Google Web Client ID.
-   - `NODE_ENV` — `production`.
-3. In MongoDB Atlas Network Access, allow the Render service to connect. Prefer a restricted allowlist where possible.
-4. Deploy and copy the Render service URL, for example `https://courserate-api.onrender.com`.
+## Repository layout
 
-### 2. Deploy the frontend on Vercel
-
-1. Import the same GitHub repository into Vercel.
-2. Set **Root Directory** to `frontend` and use the Vite framework preset.
-3. Add these environment variables for Production:
-   - `VITE_API_URL` — your Render URL plus `/api`, e.g. `https://courserate-api.onrender.com/api`.
-   - `VITE_GOOGLE_CLIENT_ID` — your Google Web Client ID.
-4. Deploy and copy the Vercel production URL, for example `https://your-app.vercel.app`.
-
-The `frontend/vercel.json` rewrite sends React Router paths such as `/admin` back to the SPA entry page.
-
-### 3. Connect and redeploy
-
-1. Change Render's `CLIENT_URL` to the Vercel production origin (no path or trailing slash) and redeploy the API.
-2. Add the Vercel production origin to the Google OAuth client's **Authorized JavaScript origins**. Keep the localhost origins for local development.
-3. Confirm `https://YOUR-RENDER-SERVICE.onrender.com/api/health` returns an `ok` status and `database: connected`.
-4. Try student and admin registration/login on the Vercel URL.
-
-Do not commit `.env` files or place server secrets in Vercel's `VITE_` variables. Vite exposes variables prefixed with `VITE_` in browser code.
-
-## Verification
-
-- `npm run lint` — frontend lint; existing warnings are listed in the command output.
-- `npm run build` — frontend production build.
-- `GET /api/health` — API and MongoDB health check.
-
-## Known limitations
-
-- Password registration does not verify email addresses; Google sign-in requires a verified Google email.
-- Public Admin signup is enabled, so this app is not appropriate for public production use where administrator access must be restricted.
-- The app uses browser local storage for JWT tokens.
-- Profile photos and image uploads are not implemented.
+```text
+backend/    Express API, authentication, database models, and routes
+frontend/   React and Vite web application
+render.yaml Render backend service configuration
+```
 
 ## License
 
-MIT — for academic use.
+MIT. See the repository for license details.

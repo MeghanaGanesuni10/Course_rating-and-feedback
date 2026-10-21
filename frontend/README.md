@@ -1,16 +1,34 @@
-# React + Vite
+# CourseRate frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The frontend is a React single-page application built with Vite. For the complete project guide, including backend setup, MongoDB Atlas, authentication, and deployment, see the [main README](../README.md).
 
-Currently, two official plugins are available:
+## Live app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- [Open CourseRate](https://course-rating-and-feedback.vercel.app/)
+- [Sign in](https://course-rating-and-feedback.vercel.app/login)
+- [Register](https://course-rating-and-feedback.vercel.app/register)
 
-## React Compiler
+## Run locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+From this folder, install dependencies and start the development server:
 
-## Expanding the Oxlint configuration
+```bash
+npm ci
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Create `frontend/.env` from `.env.example` and set:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+VITE_GOOGLE_CLIENT_ID=<your-google-web-client-id>
+```
+
+Start the backend separately; see the [main README](../README.md#run-locally). Keep server credentials out of frontend environment variables. Values prefixed with `VITE_` are included in the browser build.
+
+## Build and lint
+
+```bash
+npm run lint
+npm run build
+```

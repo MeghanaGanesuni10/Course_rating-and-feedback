@@ -19,6 +19,7 @@ import healthRoutes from './routes/health.routes.js';
 import { errorHandler, notFound } from './middleware/error.middleware.js';
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 
 // ── Security headers ──────────────────────────────────────────────────────────
@@ -84,6 +85,8 @@ const startServer = async () => {
   const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀  CourseRate API running on http://localhost:${PORT}`);
     console.log(`    Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log('JWT signing configured:', Boolean(process.env.JWT_SECRET));
+    console.log('Google sign-in configured:', Boolean(process.env.GOOGLE_CLIENT_ID));
   });
 
   // Graceful shutdown

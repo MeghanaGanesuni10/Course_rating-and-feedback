@@ -20,7 +20,15 @@ export const errorHandler = (err, req, res, next) => {
     return res.status(400).json({ message: 'Invalid ID format.' });
   }
 
-  const statusCode = err.statusCode || res.statusCode === 200 ? 500 : res.statusCode;
+  const statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
+  if (statusCode >= 500) {
+    console.error('Unhandled API error', JSON.stringify({
+      method: req.method,
+      path: req.path,
+      errorName: err.name || 'Error',
+      errorCode: err.code || null,
+    }));
+  }
   const message =
     process.env.NODE_ENV === 'production' && statusCode === 500
       ? 'Internal server error.'

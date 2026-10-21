@@ -5,6 +5,13 @@ import User from '../models/User.js';
 
 const googleClient = new OAuth2Client();
 
+const assertJwtSecretConfigured = () => {
+  if (process.env.JWT_SECRET) return;
+  const error = new Error('Authentication is not configured on this server.');
+  error.statusCode = 503;
+  throw error;
+};
+
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
@@ -31,6 +38,8 @@ export const register = async (req, res, next) => {
       return res.status(400).json({ message: 'Role must be student or admin.' });
     }
 
+    assertJwtSecretConfigured();
+
     const user = await User.create({
       name: name.trim(),
       email: emailLower,
@@ -54,6 +63,8 @@ export const login = async (req, res, next) => {
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required.' });
     }
+
+    assertJwtSecretConfigured();
 
     const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
     if (!user || !(await user.comparePassword(password))) {
@@ -80,6 +91,8 @@ export const googleLogin = async (req, res, next) => {
     if (!credential || !['student', 'admin'].includes(role)) {
       return res.status(400).json({ message: 'A Google credential and valid account type are required.' });
     }
+
+    assertJwtSecretConfigured();
 
     let identity;
     try {

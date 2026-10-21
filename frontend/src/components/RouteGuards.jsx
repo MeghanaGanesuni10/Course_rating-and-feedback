@@ -20,7 +20,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }) => {
   return children;
 };
 
-export const PublicRoute = ({ children }) => {
+export const PublicRoute = ({ children, allowAuthenticated = false }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -31,6 +31,6 @@ export const PublicRoute = ({ children }) => {
     );
   }
 
-  if (user) return <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} replace />;
+  if (user && !allowAuthenticated) return <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} replace />;
   return children;
 };

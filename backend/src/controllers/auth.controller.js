@@ -25,17 +25,21 @@ export const register = async (req, res, next) => {
     }
 
     const emailLower = email.toLowerCase().trim();
+    if (!['student', 'admin'].includes(role)) {
+      return res.status(400).json({ message: 'Role must be student or admin.' });
+    }
+
     const existing = await User.findOne({ email: emailLower });
     if (existing) {
-      return res.status(409).json({ message: 'An account with that email already exists.' });
+      return res.status(409).json({
+        code: 'ACCOUNT_ALREADY_EXISTS',
+        role: existing.role,
+        message: `This email is already registered as a ${existing.role}. Please sign in to that account.`,
+      });
     }
 
     if (password.length < 8) {
       return res.status(400).json({ message: 'Password must be at least 8 characters.' });
-    }
-
-    if (!['student', 'admin'].includes(role)) {
-      return res.status(400).json({ message: 'Role must be student or admin.' });
     }
 
     assertJwtSecretConfigured();
@@ -51,6 +55,16 @@ export const register = async (req, res, next) => {
     const token = signToken(user._id);
     res.status(201).json({ token, user });
   } catch (err) {
+    if (err.code === 11000 && err.keyPattern?.email) {
+      const existing = await User.findOne({ email: req.body.email?.toLowerCase().trim() });
+      return res.status(409).json({
+        code: 'ACCOUNT_ALREADY_EXISTS',
+        role: existing?.role,
+        message: existing
+          ? `This email is already registered as a ${existing.role}. Please sign in to that account.`
+          : 'An account with that email already exists. Please sign in.',
+      });
+    }
     next(err);
   }
 };
@@ -58,7 +72,7 @@ export const register = async (req, res, next) => {
 // POST /api/auth/login
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required.' });
@@ -69,6 +83,17 @@ export const login = async (req, res, next) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ message: 'Invalid email or password.' });
+    }
+
+    if (role && !['student', 'admin'].includes(role)) {
+      return res.status(400).json({ message: 'Role must be student or admin.' });
+    }
+    if (role && user.role !== role) {
+      return res.status(403).json({
+        code: 'ACCOUNT_ROLE_MISMATCH',
+        role: user.role,
+        message: `This email belongs to a ${user.role} account. Choose the ${user.role} login.`,
+      });
     }
 
     const token = signToken(user._id);

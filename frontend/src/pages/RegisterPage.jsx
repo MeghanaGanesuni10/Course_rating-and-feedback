@@ -107,7 +107,7 @@ export default function RegisterPage() {
 
         {error && (
           <div className="alert alert-error" style={{ marginBottom: '1.25rem' }}>
-            <span>{error}</span>
+            <span>{error}{(error.includes('already registered') || error.includes('registered as')) && <> <Link to={`/login?role=${encodeURIComponent(error.match(/registered as (?:a )?(student|admin)/)?.[1] || form.role)}`} style={{ fontWeight: 700 }}>Sign in</Link></>}</span>
           </div>
         )}
 

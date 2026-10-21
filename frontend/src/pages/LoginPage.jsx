@@ -27,21 +27,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const user = await login(form.email, form.password);
-
-      // Role mismatch check — prevent student logging in via Admin tab and vice versa
-      if (user.role !== selectedRole) {
-        // Log them out immediately
-        localStorage.removeItem('cr_token');
-        localStorage.removeItem('cr_user');
-        setError(
-          selectedRole === 'admin'
-            ? '⛔ This account does not have administrator access. Please use the Student login.'
-            : '⛔ This is an administrator account. Please use the Admin login tab.'
-        );
-        setLoading(false);
-        return;
-      }
+      const user = await login(form.email, form.password, selectedRole);
 
       toast.success(`Welcome back, ${user.name.split(' ')[0]}!`);
       navigate(user.role === 'admin' ? '/admin' : '/dashboard');

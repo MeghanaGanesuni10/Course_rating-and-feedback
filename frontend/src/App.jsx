@@ -28,8 +28,8 @@ export default function App() {
         <Routes>
           {/* Public */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-          <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+          <Route path="/login" element={<PublicRoute allowAuthenticated><LoginPage /></PublicRoute>} />
+          <Route path="/register" element={<PublicRoute allowAuthenticated><RegisterPage /></PublicRoute>} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
           {/* Protected — authenticated users */}

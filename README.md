@@ -168,9 +168,37 @@ node --check src/server.js
 ## Repository layout
 
 ```text
-backend/    Express API, authentication, database models, and routes
-frontend/   React and Vite web application
-render.yaml Render backend service configuration
+Course_feedback-and-rating/
+├── backend/
+│   ├── src/
+│   │   ├── config/          Database connection setup
+│   │   ├── controllers/     Authentication, course, feedback, and admin logic
+│   │   ├── middleware/      Authentication, validation, and error handling
+│   │   ├── models/          MongoDB models: User, Course, and Feedback
+│   │   ├── routes/          Express API route definitions
+│   │   ├── scripts/         Admin and sample data scripts
+│   │   └── server.js        API server entry point
+│   ├── .env.example         Backend environment template
+│   └── package.json         Backend dependencies and scripts
+├── frontend/
+│   ├── public/              Static public assets
+│   ├── src/
+│   │   ├── assets/          Images and imported assets
+│   │   ├── components/      Shared interface components
+│   │   ├── context/         Authentication and toast state
+│   │   ├── lib/             API client configuration
+│   │   ├── pages/           Application screens
+│   │   ├── App.jsx          Routes and application providers
+│   │   └── main.jsx         Frontend entry point
+│   ├── .env.example         Frontend environment template
+│   ├── vercel.json          SPA routing for Vercel
+│   └── package.json         Frontend dependencies and scripts
+├── .gitignore               Excludes local env files and build output
+├── render.yaml              Render backend service configuration
+└── README.md                Project overview and setup guide
 ```
 
+Local `.env` files are created from the `.env.example` templates and are not committed to the repository.
+
+## License
 

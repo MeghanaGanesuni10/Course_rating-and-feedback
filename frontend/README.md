@@ -2,6 +2,27 @@
 
 The frontend is a React single-page application built with Vite. For the complete project guide, including backend setup, MongoDB Atlas, authentication, and deployment, see the [main README](../README.md).
 
+## Folder structure
+
+```text
+frontend/
+├── public/                 # Static files served as-is
+├── src/
+│   ├── assets/             # Images and other imported assets
+│   ├── components/         # Shared UI and route guard components
+│   ├── context/            # Authentication and toast state
+│   ├── lib/                # API client and shared utilities
+│   ├── pages/              # Route-level screens
+│   ├── App.jsx             # App routes and top-level layout
+│   ├── index.css           # Global styles
+│   └── main.jsx            # Application entry point
+├── .env.example            # Frontend environment variable template
+├── index.html              # Vite HTML entry point
+├── package.json            # Scripts and dependencies
+├── vercel.json             # Vercel deployment configuration
+└── vite.config.js          # Vite configuration
+```
+
 ## Live app
 
 - [Open CourseRate](https://course-rating-and-feedback.vercel.app/)
